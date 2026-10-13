@@ -1,0 +1,40 @@
+steps:
+  # 1. Compilation et exécution des tests Maven (critère d'innovation)
+  - name: 'maven:3.9-eclipse-temurin-17'
+    entrypoint: 'mvn'
+    args: ['clean', 'package', '-DskipTests=false']
+
+  # 2. Construction de l'image Docker avec l'identifiant court du commit
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/java-app:${SHORT_SHA}',
+      '.'
+    ]
+
+  # 3. Envoi de l'image vers Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/java-app:${SHORT_SHA}'
+    ]
+
+  # 4. Déploiement automatique sur Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'java-pipeline-service',
+      '--image', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/java-app:${SHORT_SHA}',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--memory', '512Mi',
+      '--set-env-vars', 'APP_VERSION=${SHORT_SHA}'
+    ]
+
+substitutions:
+  _REGION: 'europe-west1'
+  _REPO_NAME: 'cicd-images'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/java-app:${SHORT_SHA}'
