@@ -38,3 +38,5 @@ substitutions:
 
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/java-app:${SHORT_SHA}'
+options:
+  logging: CLOUD_LOGGING_ONLY
