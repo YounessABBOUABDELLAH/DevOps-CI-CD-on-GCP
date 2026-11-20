@@ -14,8 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="etat_avancement")
@@ -26,7 +24,6 @@ public class Etat_avancement {
 	@Column
 	private String titre;
 	@Column
-	@Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
 	@Column
